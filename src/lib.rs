@@ -1,8 +1,8 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
-const PUBLISH_BYTE: &[u8] = &[0];
-const SUBSCRIBE_BYTE: &[u8] = &[1];
+const PUBLISH_BYTE: u8 = 0;
+const SUBSCRIBE_BYTE: u8 = 1;
 
 pub struct QueueClient;
 
@@ -20,8 +20,12 @@ impl Publisher {
     }
 
     pub async fn publish(&mut self, message: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
-        self.stream.write(PUBLISH_BYTE).await?;
-        self.stream.write(&message).await?;
+        let mut buf: Vec<u8> = Vec::with_capacity(message.len() + 1);
+
+        buf.push(PUBLISH_BYTE);
+        buf.extend_from_slice(message);
+
+        self.stream.write(&buf).await?;
         Ok(())
     }
 }
@@ -50,7 +54,7 @@ impl QueueClient {
 
     pub async fn subscribe(addr: &str) -> Result<Subscriber, Box<dyn std::error::Error>> {
         let mut stream = TcpStream::connect(addr).await?;
-        stream.write(SUBSCRIBE_BYTE).await?;
+        stream.write(&[SUBSCRIBE_BYTE]).await?;
         Ok(Subscriber::new(stream))
     }
 }
