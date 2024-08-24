@@ -33,18 +33,12 @@ impl Subscriber {
 }
 
 impl Subscriber {
-    pub async fn listen(&mut self) -> Option<Vec<u8>> {
+    pub async fn listen(&mut self) -> Result<Vec<u8>, std::io::Error> {
         let mut buffer = vec![0; 1024];
 
-        let n = self.stream.read(&mut buffer).await.unwrap();
+        let n = self.stream.read(&mut buffer).await;
 
-        println!("Total Of Bytes Received: {}", n);
-
-        if n == 0 {
-            return None;
-        }
-
-        Some(buffer[..n].to_vec())
+        n.map(|n| buffer[..n].to_vec())
     }
 }
 
