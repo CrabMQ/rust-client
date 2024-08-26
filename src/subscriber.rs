@@ -29,22 +29,19 @@ impl Subscriber {
     }
 
     pub async fn send_subscribe_message(&mut self) -> Result<usize, SubscribeError> {
-        let message = vec![SUBSCRIBE_BYTE];
         self.stream
-            .write(&message)
+            .write(&[SUBSCRIBE_BYTE])
             .await
             .map_err(SubscribeError::Write)
     }
 
     pub async fn listen(&mut self) -> Result<Vec<u8>, SubscribeError> {
-        let mut buffer = vec![0; 1024];
+        let mut buffer = [0; 1024];
 
-        let n = self
-            .stream
+        self.stream
             .read(&mut buffer)
             .await
-            .map_err(SubscribeError::Write)?;
-
-        Ok(buffer[..n].to_vec())
+            .map(|n| buffer[..n].to_vec())
+            .map_err(SubscribeError::Read)
     }
 }
