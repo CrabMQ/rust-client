@@ -1,14 +1,14 @@
-use crate::publisher::{PublishError, Publisher};
-use crate::subscriber::{SubscribeError, Subscriber};
+use crate::publisher::Publisher;
+use crate::subscriber::Subscriber;
 
-pub struct QueueClient;
+pub struct Client;
 
-impl QueueClient {
-    pub async fn publisher(addr: &str) -> Result<Publisher, PublishError> {
+impl Client {
+    pub async fn publisher(addr: &str) -> Result<Publisher, std::io::Error> {
         Publisher::connect(addr).await
     }
 
-    pub async fn subscriber(addr: &str) -> Result<Subscriber, SubscribeError> {
+    pub async fn subscriber(addr: &str) -> Result<Subscriber, std::io::Error> {
         match Subscriber::connect(addr).await {
             Err(e) => Err(e),
             Ok(mut subscriber) => {

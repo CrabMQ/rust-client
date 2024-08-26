@@ -13,8 +13,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokio = { version = "1", features = ["full"] }
-crabmq_client = "1.0.0"
+crabmq = "1.0.0"
 ```
 
 ## 🚀 Usage
@@ -26,15 +25,13 @@ You can connect to the CrabMQ server as a publisher or a subscriber.
 #### 📤 Publisher
 
 ```rust
-use crabmq_client::{QueueClient, Publisher};
-use tokio;
+use crabmq::Client;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut publisher = QueueClient::connect("127.0.0.1:8080").await?;
-    
-    let message = b"Hello, CrabMQ!";
-    publisher.publish(message).await?;
+async fn main() -> Result<(), std::io::Error> {
+    let mut publisher = Client::publisher("127.0.0.1:8080").await?;
+
+    publisher.publish(b"Hello, world!").await?;
 
     Ok(())
 }
@@ -43,12 +40,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #### 📥 Subscriber
 
 ```rust
-use crabmq_client::{QueueClient, Subscriber};
-use tokio;
+use crabmq::Client;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut subscriber = QueueClient::subscribe("127.0.0.1:8080").await?;
+async fn main() -> Result<(), std::io::Error> {
+    let mut subscriber = Client::subscriber("127.0.0.1:8080").await?;
 
     loop {
         let message = subscriber.listen().await?;
